@@ -1,82 +1,55 @@
-import threading
-import logging
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from pyrogram import Client, filters
-from config import API_ID, API_HASH, BOT_TOKEN
-from handlers.start import start_command
-from handlers.about import about_callback
-from handlers.settings import settings_callback, back_to_start, close_message
-from handlers.help import help_command
-from handlers.forcesub import forcesub_command
-from handlers.req_fsub import req_fsub_command, req_fsub_on, req_fsub_off
-from handlers.files import files_command, toggle_protect_content, toggle_hide_caption, toggle_channel_button
-from handlers.auto_del import auto_del_command, disable_auto_delete, set_timer
-from handlers.genlink import genlink_command
-from handlers.batch import batch_command, batch_end_command, batch_add_file
-from plugins.broadcast_plugin import broadcast_command
-from plugins.custom_welcome_plugin import custom_welcome_command
-from plugins.copyright_warning_plugin import copyright_warning_command, apply_copyright_warning
-from plugins.smallcaps_plugin import to_smallcaps
+from telegram.ext import Updater
+from config import BOT_TOKEN
+from handlers import setup_handlers
+from plugins.forcesub import setup_forcesub
+from plugins.file_saver import setup_file_saver
+from plugins.batch_save import setup_batch_save
+from plugins.auto_delete import setup_auto_delete
+from plugins.copyright_warning import setup_copyright_warning
+from plugins.user_settings import setup_user_settings
+from plugins.custom_welcome import setup_custom_welcome
+from plugins.broadcast import setup_broadcast
+from plugins.font_style import setup_font_style
+from plugins.copyright_message import setup_copyright_message
 
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+def main():
+    updater = Updater(BOT_TOKEN, use_context=True)
+    dp = updater.dispatcher
 
-# Pyrogram client
-app = Client("AnimeLordBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+    setup_handlers(dp)
+    setup_forcesub(dp)
+    setup_file_saver(dp)
+    setup_batch_save(dp)
+    setup_auto_delete(dp)
+    setup_copyright_warning(dp)
+    setup_user_settings(dp)
+    setup_custom_welcome(dp)
+    setup_broadcast(dp)
+    setup_font_style(dp)
+    setup_copyright_message(dp)
 
-# Apply Sᴍᴀʟʟ Cᴀᴘs to all messages
-async def apply_smallcaps(text):
-    return to_smallcaps(text)
+    updater.start_polling()
+    updater.idle()
 
-# Define a simple HTTP server for health checks
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/plain")
-        self.end_headers()
-        self.wfile.write(b"Anime Lord Bot is running!")  # Use ASCII characters only
+if __name__ == '__main__':
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
 
-def run_health_check_server():
-    server_address = ("", 8080)  # Listen on port 8080
-    httpd = HTTPServer(server_address, HealthCheckHandler)
-    logger.info("Starting health check server on port 8080...")
-    httpd.serve_forever()
+    class HealthCheckHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == '/health':
+                self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(b'OK')
+            else:
+                self.send_response(404)
+                self.end_headers()
 
-# Register message handlers
-app.on_message(filters.command("start") & filters.private)(start_command)
-app.on_message(filters.command("help") & filters.private)(help_command)
-app.on_message(filters.command("forcesub") & filters.private)(forcesub_command)
-app.on_message(filters.command("req_fsub") & filters.private)(req_fsub_command)
-app.on_message(filters.command("files") & filters.private)(files_command)
-app.on_message(filters.command("auto_del") & filters.private)(auto_del_command)
-app.on_message(filters.command("genlink") & filters.private)(genlink_command)
-app.on_message(filters.command("batch") & filters.private)(batch_command)
-app.on_message(filters.command("batch_end") & filters.private)(batch_end_command)
-app.on_message(filters.command("batch_add_file") & filters.private)(batch_add_file)
-app.on_message(filters.command("broadcast") & filters.private)(broadcast_command)
-app.on_message(filters.command("welcome_msg") & filters.private)(custom_welcome_command)
-app.on_message(filters.command("cws") & filters.private)(copyright_warning_command)
+    def run_health_check_server():
+        server_address = ('', 8080)
+        httpd = HTTPServer(server_address, HealthCheckHandler)
+        httpd.serve_forever()
 
-# Register callback query handlers
-app.on_callback_query(filters.regex("about"))(about_callback)
-app.on_callback_query(filters.regex("settings"))(settings_callback)
-app.on_callback_query(filters.regex("back_to_start"))(back_to_start)
-app.on_callback_query(filters.regex("close"))(close_message)
-app.on_callback_query(filters.regex("req_fsub_on"))(req_fsub_on)
-app.on_callback_query(filters.regex("req_fsub_off"))(req_fsub_off)
-app.on_callback_query(filters.regex("toggle_protect_content"))(toggle_protect_content)
-app.on_callback_query(filters.regex("toggle_hide_caption"))(toggle_hide_caption)
-app.on_callback_query(filters.regex("toggle_channel_button"))(toggle_channel_button)
-app.on_callback_query(filters.regex("disable_auto_delete"))(disable_auto_delete)
-app.on_callback_query(filters.regex("set_timer"))(set_timer)
-
-# Run the health check server in a separate thread
-if __name__ == "__main__":
-    # Start the health check server in a separate thread
-    health_check_thread = threading.Thread(target=run_health_check_server, daemon=True)
-    health_check_thread.start()
-
-    # Start the Pyrogram bot
-    logger.info("Aɴɪᴍᴇ Lᴏʀᴅ Bot is running...")
-    app.run()
+    threading.Thread(target=run_health_check_server, daemon=True).start()
+    main()
