@@ -1,7 +1,7 @@
 import threading
 import logging
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from pyrogram import Client, filters  # Ensure 'filters' is imported
+from pyrogram import Client, filters
 from config import API_ID, API_HASH, BOT_TOKEN
 from handlers.start import start_command
 from handlers.about import about_callback
@@ -42,6 +42,21 @@ def run_health_check_server():
     httpd = HTTPServer(server_address, HealthCheckHandler)
     logger.info("Starting health check server on port 8080...")
     httpd.serve_forever()
+
+# Register message handlers
+app.on_message(filters.command("start") & filters.private)(start_command)
+app.on_message(filters.command("help") & filters.private)(help_command)
+app.on_message(filters.command("forcesub") & filters.private)(forcesub_command)
+app.on_message(filters.command("req_fsub") & filters.private)(req_fsub_command)
+app.on_message(filters.command("files") & filters.private)(files_command)
+app.on_message(filters.command("auto_del") & filters.private)(auto_del_command)
+app.on_message(filters.command("genlink") & filters.private)(genlink_command)
+app.on_message(filters.command("batch") & filters.private)(batch_command)
+app.on_message(filters.command("batch_end") & filters.private)(batch_end_command)
+app.on_message(filters.command("batch_add_file") & filters.private)(batch_add_file)
+app.on_message(filters.command("broadcast") & filters.private)(broadcast_command)
+app.on_message(filters.command("welcome_msg") & filters.private)(custom_welcome_command)
+app.on_message(filters.command("cws") & filters.private)(copyright_warning_command)
 
 # Register callback query handlers
 app.on_callback_query(filters.regex("about"))(about_callback)
