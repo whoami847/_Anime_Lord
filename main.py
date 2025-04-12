@@ -30,7 +30,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/plain")
         self.end_headers()
-        self.wfile.write(b"Aɴɪᴍᴇ Lᴏʀᴅ Bot is running!")
+        self.wfile.write(b"Anime Lord Bot is running!")  # Use ASCII characters only
 
 def run_health_check_server():
     server_address = ("", 8080)  # Listen on port 8080
