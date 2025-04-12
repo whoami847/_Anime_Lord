@@ -1,7 +1,7 @@
 import threading
 import logging
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from pyrogram import Client
+from pyrogram import Client, filters  # Ensure 'filters' is imported
 from config import API_ID, API_HASH, BOT_TOKEN
 from handlers.start import start_command
 from handlers.about import about_callback
