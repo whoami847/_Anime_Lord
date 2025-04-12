@@ -1,17 +1,25 @@
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import logging
 from plugins.smallcaps_plugin import to_smallcaps
 
-@Client.on_message(filters.command("help") & filters.private)
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 async def help_command(client, message):
-    help_text = "ʜᴀʟʟᴏ, ᴀᴍɪ ᴇᴋᴛɪ ᴘʀᴀɪᴠᴇᴛ ғɪʟᴇ sʜᴀʀɪɴɢ ʙᴏᴛ, ɴɪʀᴅɪsʜᴛᴏ ᴄʜᴀɴᴇʟᴇʀ ᴊᴏɴʏᴏ ғɪʟᴇ ᴏ ᴘʀᴏʏᴏᴊᴏɴɪʏᴏ ᴊɪɴɪs sᴘᴇsʜᴀʟ ʟɪɴᴋᴇʀ ᴍᴀᴅʜʏᴏᴍᴇ ᴅᴇᴏʏᴀʀ ᴊᴏɴʏᴏ ᴛᴏɪʀɪ। ᴇᴋʜᴏɴᴏ sᴏɴᴅᴇʜ ᴀᴄʜᴇ? ɴɪᴄʜᴇʀ ʙʏᴀᴋᴛɪ/ɢʀᴜᴘᴇʀ sᴀᴛʜᴇ ᴊᴏɢᴀᴊᴏɢ ᴋᴏʀᴏ!"
-    buttons = [
-        [InlineKeyboardButton("sᴜᴘᴘᴏʀᴛ ᴄʜᴀᴛ ɢʀᴏᴜᴘ", url="your_support_group_link")],
-        [InlineKeyboardButton("ᴏᴡɴᴇʀ", url="your_owner_link")],
-        [InlineKeyboardButton("ᴅᴇᴠᴇʟᴏᴘᴇʀ", url="https://t.me/shidoteshika1")]
-    ]
-    await message.reply_photo(
-        photo="images/help.jpg",
-        caption=await to_smallcaps(help_text),
-        reply_markup=InlineKeyboardMarkup(buttons)
+    logger.info(f"Received /help command from user {message.from_user.id}")
+    help_text = await to_smallcaps(
+        "📚 ʜᴇʟᴘ ᴍᴇɴᴜ\n\n"
+        "ʜᴇʀᴇ ᴀʀᴇ ᴛʜᴇ ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs:\n\n"
+        "/sᴛᴀʀᴛ - sᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ\n"
+        "/ʜᴇʟᴘ - sʜᴏᴡ ᴛʜɪs ʜᴇʟᴘ ᴍᴇɴᴜ\n"
+        "/ғᴏʀᴄᴇsᴜʙ - ᴄʜᴇᴄᴋ ғᴏʀᴄᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ\n"
+        "/ʀᴇǫ_ғsᴜʙ - ᴍᴀɴᴀɢᴇ ʀᴇǫᴜɪʀᴇᴅ ғᴏʀᴄᴇ sᴜʙ (ᴀᴅᴍɪɴ ᴏɴʟʏ)\n"
+        "/ғɪʟᴇs - ᴍᴀɴᴀɢᴇ ғɪʟᴇ sᴇᴛᴛɪɴɢs (ᴀᴅᴍɪɴ ᴏɴʟʏ)\n"
+        "/ᴀᴜᴛᴏ_ᴅᴇʟ - sᴇᴛ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ᴛɪᴍᴇʀ (ᴀᴅᴍɪɴ ᴏɴʟʏ)\n"
+        "/ɢᴇɴʟɪɴᴋ - ɢᴇɴᴇʀᴀᴛᴇ ᴅɪʀᴇᴄᴛ ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ\n"
+        "/ʙᴀᴛᴄʜ - sᴛᴀʀᴛ ʙᴀᴛᴄʜ ғɪʟᴇ sʜᴀʀɪɴɢ\n"
+        "/ʙʀᴏᴀᴅᴄᴀsᴛ - ʙʀᴏᴀᴅᴄᴀsᴛ ᴍᴇssᴀɢᴇ (ᴀᴅᴍɪɴ ᴏɴʟʏ)\n"
+        "/ᴡᴇʟᴄᴏᴍᴇ_ᴍsɢ - sᴇᴛ ᴄᴜsᴛᴏᴍ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇ (ᴀᴅᴍɪɴ ᴏɴʟʏ)\n"
+        "/ᴄᴡs - sᴇᴛ ᴄᴏᴘʏʀɪɢʜᴛ ᴡᴀʀɴɪɴɢ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"
     )
+    await message.reply(help_text)
