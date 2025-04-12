@@ -15,7 +15,7 @@ async def genlink_command(client, message):
 
     # Generate link
     file_link = f"https://t.me/c/{str(STORAGE_CHANNEL).replace('-100', '')}/{file_message.id}"
-    await message.reply(await to_smallcaps(f"ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ: {file_link}"))
+    reply_message = await message.reply(await to_smallcaps(f"ᴅᴏᴡɴʟᴏᴀᴅ ʟɪɴᴋ: {file_link}"))
 
     # Apply copyright warning
-    await apply_copyright_warning(client, message)
+    await apply_copyright_warning(client, reply_message)
