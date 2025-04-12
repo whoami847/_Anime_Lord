@@ -1,35 +1,68 @@
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+import logging
 from config import ADMIN_IDS
 from database import get_settings, update_settings
 from plugins.smallcaps_plugin import to_smallcaps
 
-@Client.on_message(filters.command("auto_del") & filters.user(ADMIN_IDS))
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 async def auto_del_command(client, message):
+    logger.info(f"Received /auto_del command from user {message.from_user.id}")
+    if message.from_user.id not in ADMIN_IDS:
+        await message.reply(await to_smallcaps("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ᴀᴅᴍɪɴs!"))
+        return
+
     settings = get_settings()
-    auto_del_text = (
-        f"ᴀᴜᴛᴏ-ᴅɪʟɪᴛ ᴍᴏᴅᴇ: {'ᴄʜᴀʟᴜ' if settings['auto_delete'] else 'ʙᴏɴᴅʜ'}\n"
-        f"ᴅɪʟɪᴛ ᴛᴀɪᴍᴀʀ: {settings['delete_timer'] // 3600} ɢʜᴏɴᴛᴀ\n"
-        "ɴɪᴄʜᴇʀ ʙᴀᴛᴏɴᴇ ᴋʟɪᴄᴋ ᴋᴏʀᴇ sᴇᴛɪɴɢs ᴘᴏʀɪʙᴏʀᴛᴏɴ ᴋᴏʀᴏ।"
-    )
-    buttons = [
-        [InlineKeyboardButton("ᴅɪsᴀʙʟᴇ ᴍᴏᴅᴇ", callback_data="disable_auto_delete")],
-        [InlineKeyboardButton("sᴇᴛ ᴛɪᴍᴇʀ", callback_data="set_timer")],
-        [InlineKeyboardButton("ʀᴇғʀᴇsʜ", callback_data="refresh_auto_del")],
-        [InlineKeyboardButton("ᴄʟᴏsᴇ", callback_data="close")]
-    ]
-    await message.reply_photo(
-        photo="images/auto_del.jpg",
-        caption=await to_smallcaps(auto_del_text),
-        reply_markup=InlineKeyboardMarkup(buttons)
+    timer = settings.get("auto_delete_timer", 0)
+    status = "ᴇɴᴀʙʟᴇᴅ" if timer > 0 else "ᴅɪsᴀʙʟᴇᴅ"
+    timer_text = f"{timer // 60} ᴍɪɴᴜᴛᴇ(s)" if timer > 0 else "ɴᴏᴛ sᴇᴛ"
+
+    await message.reply(
+        await to_smallcaps(
+            f"⏰ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ sᴇᴛᴛɪɴɢs\n\n"
+            f"sᴛᴀᴛᴜs: {status}\n"
+            f"ᴛɪᴍᴇʀ: {timer_text}\n\n"
+            "ᴜsᴇ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ᴍᴀɴᴀɢᴇ:"
+        ),
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(await to_smallcaps("sᴇᴛ ᴛɪᴍᴇʀ"), callback_data="set_timer"),
+                    InlineKeyboardButton(await to_smallcaps("ᴅɪsᴀʙʟᴇ"), callback_data="disable_auto_delete")
+                ]
+            ]
+        )
     )
 
-@Client.on_callback_query(filters.regex("disable_auto_delete"))
 async def disable_auto_delete(client, callback_query):
-    update_settings({"auto_delete": False})
-    await callback_query.message.edit(await to_smallcaps("ᴀᴜᴛᴏ-ᴅɪʟɪᴛ ᴍᴏᴅᴇ ʙᴏɴᴅʜ ᴋᴏʀᴀ ʜᴏʏᴇᴄʜᴇ!"))
+    logger.info(f"Received disable_auto_delete callback from user {callback_query.from_user.id}")
+    if callback_query.from_user.id not in ADMIN_IDS:
+        await callback_query.answer(await to_smallcaps("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ᴀᴅᴍɪɴs!"), show_alert=True)
+        return
 
-@Client.on_callback_query(filters.regex("set_timer"))
+    update_settings({"auto_delete_timer": 0})
+    await callback_query.message.edit_text(
+        await to_smallcaps("⏰ ᴀᴜᴛᴏ ᴅᴇʟᴇᴛᴇ ʜᴀs ʙᴇᴇɴ ᴅɪsᴀʙʟᴇᴅ!"),
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(await to_smallcaps("sᴇᴛ ᴛɪᴍᴇʀ"), callback_data="set_timer"),
+                    InlineKeyboardButton(await to_smallcaps("ᴅɪsᴀʙʟᴇ"), callback_data="disable_auto_delete")
+                ]
+            ]
+        )
+    )
+    await callback_query.answer()
+
 async def set_timer(client, callback_query):
-    update_settings({"delete_timer": 7200})  # Example: 2 hours
-    await callback_query.message.edit(await to_smallcaps("ᴅɪʟɪᴛ ᴛᴀɪᴍᴀʀ 2 ɢʜᴏɴᴛᴀ ᴋᴏʀᴀ ʜᴏʏᴇᴄʜᴇ!"))
+    logger.info(f"Received set_timer callback from user {callback_query.from_user.id}")
+    if callback_query.from_user.id not in ADMIN_IDS:
+        await callback_query.answer(await to_smallcaps("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ɪs ᴏɴʟʏ ғᴏʀ ᴀᴅᴍɪɴs!"), show_alert=True)
+        return
+
+    # Placeholder for setting timer (requires user input handling)
+    await callback_query.message.edit_text(
+        await to_smallcaps("ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴛʜᴇ ᴛɪᴍᴇʀ ᴅᴜʀᴀᴛɪᴏɴ ɪɴ ᴍɪɴᴜᴛᴇs (ᴇ.ɢ., 5 ғᴏʀ 5 ᴍɪɴᴜᴛᴇs):")
+    )
+    await callback_query.answer()
