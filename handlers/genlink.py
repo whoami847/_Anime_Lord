@@ -1,5 +1,4 @@
 import logging
-from pyrogram import Client, filters
 from config import STORAGE_CHANNEL
 from utils.storage import save_to_storage
 from plugins.smallcaps_plugin import to_smallcaps
@@ -9,7 +8,6 @@ from plugins.copyright_warning_plugin import apply_copyright_warning
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-@Client.on_message(filters.command("genlink") & filters.private)
 async def genlink_command(client, message):
     logger.info(f"Received /genlink command from user {message.from_user.id}")
     if not message.reply_to_message:
