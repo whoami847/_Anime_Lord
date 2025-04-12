@@ -1,0 +1,19 @@
+services:
+  - name: anime-lord
+    type: web
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    env:
+      - name: BOT_TOKEN
+        value: "8018682528:AAEB0W9Ljb8Prfyi9qeVYX93OZzcGBuLEYA"
+    ports:
+      - port: 8080
+    healthCheck:
+      http:
+        path: /health
+        port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 30
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
