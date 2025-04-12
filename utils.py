@@ -9,22 +9,46 @@ start_time = time.time()
 
 # MongoDB initialization
 def init_db():
-    client = pymongo.MongoClient(MONGO_URL)
-    db = client["anime"]
-    return db
+    try:
+        client = pymongo.MongoClient(MONGO_URL)
+        db = client["Anime"]  # ডাটাবেস নাম ছোট হাতের অক্ষরে রাখা হয়েছে
+        return db
+    except Exception as e:
+        print(f"Failed to connect to MongoDB: {e}")
+        return None
 
 db = init_db()
-users_collection = db["users"]
+users_collection = db["users"] if db else None
 
 def add_user(user_id):
-    users_collection.update_one({"user_id": user_id}, {"$set": {"user_id": user_id}}, upsert=True)
+    if not users_collection:
+        print("MongoDB not connected. Skipping user addition.")
+        return
+    try:
+        users_collection.update_one({"user_id": user_id}, {"$set": {"user_id": user_id}}, upsert=True)
+    except Exception as e:
+        print(f"Error adding user to MongoDB: {e}")
 
 def get_user_count():
-    return users_collection.count_documents({})
+    if not users_collection:
+        print("MongoDB not connected. Returning 0 for user count.")
+        return 0
+    try:
+        return users_collection.count_documents({})
+    except Exception as e:
+        print(f"Error getting user count from MongoDB: {e}")
+        return 0
 
 def get_all_users():
-    users = users_collection.find({}, {"user_id": 1})
-    return [user["user_id"] for user in users]
+    if not users_collection:
+        print("MongoDB not connected. Returning empty list for users.")
+        return []
+    try:
+        users = users_collection.find({}, {"user_id": 1})
+        return [user["user_id"] for user in users]
+    except Exception as e:
+        print(f"Error getting users from MongoDB: {e}")
+        return []
 
 def get_uptime():
     uptime_seconds = int(time.time() - start_time)
