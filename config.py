@@ -1,5 +1,3 @@
-# config.py
-
 # Telegram API credentials (replace with your own values)
 API_ID = "28774737"  # Your API ID from my.telegram.org
 API_HASH = "851190ab85bb0b6dd547fff8e3c35b73"  # Your API Hash from my.telegram.org
@@ -18,3 +16,12 @@ CHANNELS = ["@just_test_only_0"]
 
 # MongoDB URL (optional, for database features)
 MONGO_URL = "mongodb+srv://Anime:Anime@anime.suydbfe.mongodb.net/?retryWrites=true&w=majority&appName=Anime"  # Replace with your MongoDB URL, or leave empty if not using MongoDB
+
+# Auto delete time (in seconds)
+AUTO_DELETE_TIME = 20 * 60
+
+# Default copyright warning message
+COPYRIGHT_WARNING_MESSAGE = "⚠️ Please forward this file within 20 minutes, otherwise it will be deleted."
+
+# Default welcome message
+WELCOME_MESSAGE = "🌟 Welcome! I am your file sharing bot. Use /menu to see the options."
