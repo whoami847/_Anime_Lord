@@ -11,17 +11,17 @@ start_time = time.time()
 def init_db():
     try:
         client = pymongo.MongoClient(MONGO_URL)
-        db = client["Anime"]  # ডাটাবেস নাম ছোট হাতের অক্ষরে রাখা হয়েছে
+        db = client["anime"]  # ডাটাবেস নাম ছোট হাতের অক্ষরে
         return db
     except Exception as e:
         print(f"Failed to connect to MongoDB: {e}")
         return None
 
 db = init_db()
-users_collection = db["users"] if db else None
+users_collection = db["users"] if db is not None else None  # এখানে 'if db' এর পরিবর্তে 'if db is not None' ব্যবহার করা হয়েছে
 
 def add_user(user_id):
-    if not users_collection:
+    if users_collection is None:
         print("MongoDB not connected. Skipping user addition.")
         return
     try:
@@ -30,7 +30,7 @@ def add_user(user_id):
         print(f"Error adding user to MongoDB: {e}")
 
 def get_user_count():
-    if not users_collection:
+    if users_collection is None:
         print("MongoDB not connected. Returning 0 for user count.")
         return 0
     try:
@@ -40,7 +40,7 @@ def get_user_count():
         return 0
 
 def get_all_users():
-    if not users_collection:
+    if users_collection is None:
         print("MongoDB not connected. Returning empty list for users.")
         return []
     try:
